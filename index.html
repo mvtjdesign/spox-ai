@@ -1,88 +1,739 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>spox AI | Protocol Architecture</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>spox AI | Protocol Architecture & Logic Layer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #050505;
+            --surface: #0a0a0a;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.15);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(15, 23, 42, 0.4);
+            --card-bg: rgba(255, 255, 255, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
+            background-color: var(--bg);
+            color: var(--text);
             font-family: 'Inter', sans-serif;
-            background-color: #050505;
-            color: #f8fafc;
+            line-height: 1.6;
             overflow-x: hidden;
         }
+
         h1, h2, h3, h4 {
             font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.04em;
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- Background Effects --- */
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% -20%, #111827 0%, #050505 80%);
+            z-index: -1;
+        }
+
+        .orb {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: var(--primary-glow);
+            filter: blur(120px);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* --- UI Elements --- */
         .glass {
-            background: rgba(15, 23, 42, 0.4);
+            background: var(--glass);
             backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
         }
-        .bg-mesh {
-            background: radial-gradient(circle at 50% -20%, #0f172a 0%, #050505 100%);
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
         }
-        .text-gradient {
-            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            color: #ffffff;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 24px 0;
+            transition: all 0.4s ease;
+        }
+
+        nav.scrolled {
+            padding: 16px 0;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .nav-links {
+            display: none;
+            gap: 32px;
+        }
+
+        @media (min-width: 1024px) {
+            .nav-links { display: flex; }
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover { color: #ffffff; }
+
+        /* --- Hero --- */
+        .hero {
+            padding: 180px 0 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 6px 16px;
+            border-radius: 100px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 32px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 8vw, 84px);
+            line-height: 0.95;
+            margin-bottom: 32px;
+            background: linear-gradient(180deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .btn-institutional {
-            background: #ffffff;
-            color: #050505;
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-dim);
+            max-width: 640px;
+            margin: 0 auto 48px;
+            font-weight: 400;
+        }
+
+        .hero-cta {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats {
+            margin-top: 80px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 48px;
+        }
+
+        @media (min-width: 768px) {
+            .hero-stats { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .stat-item span:first-child {
+            display: block;
+            font-size: 9px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.2s ease;
+            color: var(--text-dim);
+            letter-spacing: 0.25em;
+            margin-bottom: 8px;
         }
-        .btn-institutional:hover {
-            background: #3b82f6;
+
+        .stat-item span:last-child {
+            font-size: 20px;
+            font-weight: 700;
             color: #ffffff;
+            letter-spacing: -0.02em;
         }
-        .btn-outline {
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        /* --- Main Sections --- */
+        section { padding: 100px 0; }
+
+        .section-header { margin-bottom: 64px; }
+        .section-header h2 { font-size: 36px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: -0.03em; }
+        .section-header p { color: var(--text-dim); font-size: 16px; max-width: 600px; }
+
+        .grid { display: grid; gap: 24px; }
+        .grid-3 { grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+        .card {
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.03);
+            transform: translateY(-8px);
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            color: var(--primary);
+        }
+
+        .card h3 { font-size: 18px; margin-bottom: 12px; color: #ffffff; }
+        .card p { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+        /* --- How It Works --- */
+        .process-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 1024px) { .process-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .process-step {
+            position: relative;
+            padding: 40px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--border);
+        }
+
+        .step-num {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-size: 12px;
+            font-weight: 900;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+
+        /* --- Roadmap --- */
+        .roadmap-card {
+            padding: 32px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+        }
+        .roadmap-card.active {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .phase-label {
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: block;
+        }
+        .roadmap-list {
+            list-style: none;
+            margin-top: 16px;
+        }
+        .roadmap-list li {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); }
+        .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
+        /* --- FAQ --- */
+        .faq-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .faq-item {
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover { border-color: rgba(255,255,255,0.2); }
+        .faq-item summary {
+            list-style: none;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '+'; color: var(--primary); font-size: 20px; transition: transform 0.3s; }
+        .faq-item[open] summary::after { content: '−'; }
+        .faq-item p { padding-top: 16px; font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+        /* --- Footer --- */
+        footer {
+            padding: 80px 0 40px;
+            border-top: 1px solid var(--border);
+            background: #000;
+        }
+        .footer-content {
+            display: grid;
+            gap: 64px;
+            grid-template-columns: 1fr;
+            margin-bottom: 64px;
+        }
+        @media (min-width: 1024px) { .footer-content { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+        
+        .footer-brand p { color: var(--text-dim); font-size: 14px; margin-top: 16px; max-width: 300px; }
+        .footer-title { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #fff; margin-bottom: 24px; }
+        .footer-links { list-style: none; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--primary); }
+
+        .compliance-note {
+            padding: 32px;
             background: rgba(255, 255, 255, 0.02);
-            color: #ffffff;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: all 0.2s ease;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
-        .btn-outline:hover {
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.05);
-        }
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #050505;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-        }
+        .compliance-note h5 { font-size: 9px; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.2em; margin-bottom: 12px; }
+        .compliance-note p { font-size: 10px; color: #525252; line-height: 1.8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .copyright { text-align: center; font-size: 10px; color: #404040; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* --- SVG/CSS Icons --- */
+        .svg-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
     </style>
-    <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@19.2.3",
-    "react-dom": "https://esm.sh/react-dom@19.2.3",
-    "react-dom/client": "https://esm.sh/react-dom@19.2.3/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react",
-    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
   }
 }
 </script>
 </head>
-<body class="bg-mesh">
-    <div id="root"></div>
-    <script type="module" src="index.tsx"></script>
+<body>
+
+    <div class="bg-glow"></div>
+    <div class="orb" style="top: 10%; left: 10%;"></div>
+    <div class="orb" style="bottom: 10%; right: 10%; opacity: 0.2;"></div>
+
+    <nav id="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo">
+                <div class="logo-mark">
+                    <svg class="svg-icon" viewBox="0 0 24 24" style="color: #fff; width: 16px; height: 16px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                </div>
+                spox AI
+            </a>
+            
+            <div class="nav-links">
+                <a href="#technology">Technology</a>
+                <a href="#process">Protocol</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="#security">Security</a>
+                <a href="#faq">FAQ</a>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <a href="#" class="btn btn-outline" style="padding: 10px 20px; font-size: 10px;">Connect</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="badge">Institutional Logic Protocol</div>
+                <h1>Intelligence.<br>Verified On-Chain.</h1>
+                <p>The foundational reasoning layer for decentralized systems. Pioneering autonomous economic agency through distributed, verifiable AI infrastructure.</p>
+                <div class="hero-cta">
+                    <a href="#" class="btn btn-primary">Read Whitepaper</a>
+                    <a href="#" class="btn btn-outline">Join Community</a>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span>Ticker</span>
+                        <span>SPOX</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Network</span>
+                        <span>Ethereum</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Supply Cap</span>
+                        <span>1,000,000,000</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Phase</span>
+                        <span>Architecture</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Section -->
+        <section id="technology">
+            <div class="container">
+                <div class="section-header">
+                    <div class="badge" style="margin-bottom: 16px;">Core Technology</div>
+                    <h2>The Logic Standard.</h2>
+                    <p>spox AI provides a high-fidelity computational layer that acts as the technical substrate for decentralized reasoning nodes and agentic systems.</p>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </div>
+                        <h3>On-Chain Reasoning</h3>
+                        <p>Leveraging zero-knowledge verification to validate complex AI reasoning cycles without sacrificing data privacy or transaction latency.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        </div>
+                        <h3>Distributed Compute</h3>
+                        <p>A global protocol for processing nodes that handle specialized AI tasks, incentivizing high-fidelity logic cycles across the network.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <h3>Agent Autonomy</h3>
+                        <p>Empowering self-sovereign agents to optimize yield, manage cross-chain liquidity, and execute governance with cryptographic certainty.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section id="process" style="background: rgba(255,255,255,0.01);">
+            <div class="container">
+                <div class="section-header" style="text-align: center; margin: 0 auto 64px;">
+                    <h2>The Reasoning Loop.</h2>
+                    <p style="margin: 0 auto;">Standardizing how complex computational tasks are processed across decentralized node clusters.</p>
+                </div>
+
+                <div class="process-grid">
+                    <div class="process-step">
+                        <span class="step-num">01</span>
+                        <h4 style="margin-bottom: 12px; font-weight: 700;">Intent Parsing</h4>
+                        <p style="font-size: 14px; color: var(--text-dim);">The protocol converts raw system intent into structured computational requests compatible with our distributed engine.</p>
+                    </div>
+                    <div class="process-step">
+                        <span class="step-num">02</span>
+                        <h4 style="margin-bottom: 12px; font-weight: 700;">Logic Verification</h4>
+                        <p style="font-size: 14px; color: var(--text-dim);">Competing node clusters process the reasoning cycle, producing cryptographic proofs of computational correctness.</p>
+                    </div>
+                    <div class="process-step">
+                        <span class="step-num">03</span>
+                        <h4 style="margin-bottom: 12px; font-weight: 700;">Immutable Settlement</h4>
+                        <p style="font-size: 14px; color: var(--text-dim);">Finalized logic is committed to the blockchain, ensuring a permanent record of verified autonomous decisions.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap Section -->
+        <section id="roadmap">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Protocol Roadmap.</h2>
+                    <p>Technically-focused milestones prioritized for protocol stability and distributed compute scaling.</p>
+                </div>
+
+                <div class="grid grid-3">
+                    <div class="roadmap-card active">
+                        <span class="phase-label">Phase 01: Architecture</span>
+                        <h3 style="margin-bottom: 8px;">Genesis Design</h3>
+                        <p style="font-size: 13px; color: var(--text-dim);">Establishing the foundational smart contract specifications and tokenomic audits.</p>
+                        <ul class="roadmap-list">
+                            <li><span class="dot active"></span> Genesis Contract Draft</li>
+                            <li><span class="dot active"></span> Reasoning Engine Alpha</li>
+                            <li><span class="dot active"></span> Economic Audit v1.0</li>
+                        </ul>
+                    </div>
+                    <div class="roadmap-card">
+                        <span class="phase-label">Phase 02: Integration</span>
+                        <h3 style="margin-bottom: 8px;">Compute Bridge</h3>
+                        <p style="font-size: 13px; color: var(--text-dim);">Deploying non-custodial bridges and the distributed compute node network.</p>
+                        <ul class="roadmap-list">
+                            <li><span class="dot"></span> Testnet Node Launch</li>
+                            <li><span class="dot"></span> Bridge Protocol Beta</li>
+                            <li><span class="dot"></span> Security Stress Test</li>
+                        </ul>
+                    </div>
+                    <div class="roadmap-card">
+                        <span class="phase-label">Phase 03: Expansion</span>
+                        <h3 style="margin-bottom: 8px;">Autonomous Mainnet</h3>
+                        <p style="font-size: 13px; color: var(--text-dim);">Activating the DAO governance framework and scaling compute hub capacity.</p>
+                        <ul class="roadmap-list">
+                            <li><span class="dot"></span> Mainnet TGE</li>
+                            <li><span class="dot"></span> DAO Activation</li>
+                            <li><span class="dot"></span> Hub Expansion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" style="background: #000;">
+            <div class="container">
+                <div style="text-align: center; max-width: 800px; margin: 0 auto 64px;">
+                    <h2 style="font-size: 40px; margin-bottom: 24px;">Institutional Integrity.</h2>
+                    <p style="color: var(--text-dim);">Nexis-standard security frameworks designed for protocol stability and stakeholder protection.</p>
+                </div>
+                
+                <div class="grid grid-3">
+                    <div class="card" style="border-color: rgba(59, 130, 246, 0.1);">
+                        <h3>Audited Architecture</h3>
+                        <p>Complete smart contract verification by leading security firms scheduled prior to protocol launch.</p>
+                    </div>
+                    <div class="card" style="border-color: rgba(59, 130, 246, 0.1);">
+                        <h3>Fixed Supply Model</h3>
+                        <p>A strictly hardcoded supply cap of 1B tokens to prevent inflationary dilution of protocol value.</p>
+                    </div>
+                    <div class="card" style="border-color: rgba(59, 130, 246, 0.1);">
+                        <h3>Non-Custodial Design</h3>
+                        <p>Zero protocol-held funds. All interactions occur directly on-chain via participant wallets.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq">
+            <div class="container">
+                <div class="section-header" style="text-align: center; margin: 0 auto 48px;">
+                    <h2>Common Queries.</h2>
+                </div>
+                <div class="faq-list">
+                    <details class="faq-item">
+                        <summary>What is the primary utility of SPOX?</summary>
+                        <p>SPOX functions as the native compute credit for the reasoning protocol. It is used to settle computation costs, reward node operators, and facilitate governance within the DAO.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>How does the reasoning verification work?</summary>
+                        <p>The protocol utilizes a Zero-Knowledge proof system where nodes process AI requests and return a cryptographic "receipt" that proves the logic was executed as intended without exposing the raw data.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Is the protocol restricted to certain jurisdictions?</summary>
+                        <p>Access to the protocol and token allocation may be restricted in specific regions (e.g., USA, China) to ensure global regulatory compliance. Refer to our legal documentation for details.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>Can developers build on the spox AI layer?</summary>
+                        <p>Yes. We will release a comprehensive SDK and developer portal during Phase 2, enabling the integration of autonomous agents and smart contract automation.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#" class="logo">
+                        <div class="logo-mark"><svg class="svg-icon" viewBox="0 0 24 24" style="color: #fff; width: 14px; height: 14px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div>
+                        spox AI
+                    </a>
+                    <p>The foundational logic layer for the next generation of decentralized autonomous systems.</p>
+                </div>
+                <div>
+                    <h4 class="footer-title">Protocol</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Whitepaper</a></li>
+                        <li><a href="#">Governance</a></li>
+                        <li><a href="#">Architecture</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Security Audit</a></li>
+                        <li><a href="#">Legal Docs</a></li>
+                        <li><a href="#">Press Kit</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="footer-title">Social</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">X (Twitter)</a></li>
+                        <li><a href="#">Telegram</a></li>
+                        <li><a href="#">Github</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="compliance-note">
+                <h5>Compliance & Regulatory Notice</h5>
+                <p>Informational purposes only. spox AI (SPOX) is a utility protocol and does not constitute financial or investment advice. Blockchain protocol interaction involves high risk. Participation may be restricted in certain jurisdictions including the United States and China. Consult legal advisors before interaction. No guarantees of token value, liquidity, or protocol performance are made or implied. Finality is subject to network consensus.</p>
+            </div>
+
+            <div class="copyright">
+                © 2024 spox AI Labs • Distributed Autonomous Entity • BVI #LX-9421-SPX
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar Scroll Styling
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Anchor Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return;
+                
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
