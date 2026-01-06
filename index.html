@@ -1,42 +1,88 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SPOX AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="SPOX AI is an AI-driven infrastructure platform for sports data, analytics, and on-chain applications." />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>spox AI | Protocol Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .bg-mesh {
+            background: radial-gradient(circle at 50% -20%, #0f172a 0%, #050505 100%);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-institutional {
+            background: #ffffff;
+            color: #050505;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.2s ease;
+        }
+        .btn-institutional:hover {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+        .btn-outline {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.02);
+            color: #ffffff;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.2s ease;
+        }
+        .btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+        }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.2.3",
+    "react-dom": "https://esm.sh/react-dom@19.2.3",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.3/client",
+    "lucide-react": "https://esm.sh/lucide-react@0.460.0?external=react",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
+  }
+}
+</script>
 </head>
-<body>
-  <h1>SPOX AI</h1>
-
-  <p>
-    SPOX AI is an AI-driven infrastructure platform focused on sports data,
-    predictive analytics, and blockchain-adjacent applications.
-  </p>
-
-  <h2>What We’re Building</h2>
-  <ul>
-    <li>AI systems for structured and unstructured sports data</li>
-    <li>Predictive modeling for performance and analytics use cases</li>
-    <li>Infrastructure designed for future on-chain integrations</li>
-  </ul>
-
-  <h2>Vision</h2>
-  <p>
-    Our goal is to provide reliable, transparent, and scalable AI infrastructure
-    for next-generation sports and gaming platforms.
-  </p>
-
-  <h2>Status</h2>
-  <p>
-    SPOX AI is currently in early development. More information will be released
-    as the platform evolves.
-  </p>
-
-  <footer>
-    <p>
-      © 2026 SPOX AI. Experimental technology. Not financial advice.
-    </p>
-  </footer>
+<body class="bg-mesh">
+    <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>
